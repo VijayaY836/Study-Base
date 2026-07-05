@@ -470,3 +470,57 @@ body {
   background: var(--mint); color: var(--mint-deep); border-radius: 10px;
   padding: 9px 12px; font-size: 0.85rem; font-weight: 500; margin-bottom: 12px;
 }
+
+/* ============================================================
+   v5 — living background (drifting blobs + floating doodles)
+   ============================================================ */
+/* body keeps only the dotted-paper texture now; colour comes from the
+   animated blobs below so it can gently move */
+body {
+  background-image: radial-gradient(rgba(58, 53, 96, 0.05) 1.1px, transparent 1.1px);
+  background-size: 22px 22px;
+  background-attachment: fixed;
+}
+
+.bg-layer {
+  position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none;
+}
+
+.blob {
+  position: absolute; border-radius: 50%; filter: blur(70px); opacity: 0.55;
+  will-change: transform;
+}
+.blob.b1 { width: 44vw; height: 44vw; background: var(--peach); top: -12vw; right: -10vw;
+  animation: blobFloat1 26s ease-in-out infinite; }
+.blob.b2 { width: 40vw; height: 40vw; background: var(--mint); bottom: -14vw; left: -8vw;
+  animation: blobFloat2 32s ease-in-out infinite; }
+.blob.b3 { width: 36vw; height: 36vw; background: var(--sky); top: 34vh; left: 46vw;
+  opacity: 0.4; animation: blobFloat3 38s ease-in-out infinite; }
+
+@keyframes blobFloat1 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(-5vw, 5vh) scale(1.12); }
+}
+@keyframes blobFloat2 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(6vw, -4vh) scale(1.08); }
+}
+@keyframes blobFloat3 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(-6vw, -3vh) scale(1.1); }
+  66% { transform: translate(4vw, 4vh) scale(0.94); }
+}
+
+.doodle {
+  position: absolute; display: block; will-change: transform;
+  animation: doodleDrift var(--dur, 24s) ease-in-out infinite;
+  animation-delay: var(--delay, 0s);
+}
+@keyframes doodleDrift {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-26px) rotate(var(--rot, 12deg)); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .blob, .doodle { animation: none !important; }
+}
