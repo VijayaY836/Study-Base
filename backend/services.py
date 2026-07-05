@@ -163,3 +163,34 @@ def fetch_holidays(year, country: str):
                 for h in r.json()]
     except Exception:
         return []
+
+
+# ------------------------------------------------------------- ai chat ----
+OPENROUTER_API_KEY = os.environ.get("OPENROUTER_API_KEY", "")
+OPENROUTER_MODEL = os.environ.get("OPENROUTER_MODEL", "openrouter/free")
+
+
+def chat_completion(messages):
+    """Call OpenRouter (OpenAI-compatible). Returns reply text or None if the
+    key is missing or the request fails. Never raises."""
+    if not OPENROUTER_API_KEY:
+        return None
+    try:
+        r = requests.post(
+            "https://openrouter.ai/api/v1/chat/completions",
+            headers={
+                "Authorization": f"Bearer {OPENROUTER_API_KEY}",
+                "Content-Type": "application/json",
+                "X-Title": "StudyBase",
+            },
+            json={
+                "model": OPENROUTER_MODEL,
+                "messages": messages,
+                "max_tokens": 600,
+                "temperature": 0.6,
+            },
+            timeout=30,
+        )
+        return r.json()["choices"][0]["message"]["content"]
+    except Exception:
+        return None

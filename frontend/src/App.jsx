@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react'
 import { supabase, demoMode } from './lib/supabase'
 import Dashboard from './pages/Dashboard'
 import Calendar from './pages/Calendar'
+import Account from './pages/Account'
+import Chatbot from './pages/Chatbot'
 import Tasks from './pages/Tasks'
 import Gpa from './pages/Gpa'
 import Reflections from './pages/Reflections'
@@ -95,6 +97,7 @@ function AuthGate({ onDone }) {
 
 export default function App() {
   const [tab, setTab] = useState('dashboard')
+  const [showAccount, setShowAccount] = useState(false)
   const [session, setSession] = useState(null)
   const [ready, setReady] = useState(demoMode)
 
@@ -119,11 +122,14 @@ export default function App() {
           <h1>Study<em>Base</em></h1>
           <span className="tagline">your semester, sorted</span>
         </div>
-        {!demoMode && (
-          <button className="signout" onClick={() => supabase.auth.signOut()}>
-            sign out
-          </button>
-        )}
+        <div className="topbar-actions">
+          <button className="signout" onClick={() => setShowAccount(true)}>my account</button>
+          {!demoMode && (
+            <button className="signout" onClick={() => supabase.auth.signOut()}>
+              sign out
+            </button>
+          )}
+        </div>
       </div>
 
       {demoMode && (
@@ -132,22 +138,32 @@ export default function App() {
         </div>
       )}
 
-      <nav className="tabs" aria-label="Sections">
-        {TABS.map(t => (
-          <button
-            key={t.id}
-            data-c={t.color}
-            className={`tab ${tab === t.id ? 'active' : ''}`}
-            onClick={() => setTab(t.id)}
-          >
-            {t.label}
-          </button>
-        ))}
-      </nav>
+      {showAccount ? (
+        <div className="fade-in">
+          <Account onBack={() => setShowAccount(false)} />
+        </div>
+      ) : (
+        <>
+          <nav className="tabs" aria-label="Sections">
+            {TABS.map(t => (
+              <button
+                key={t.id}
+                data-c={t.color}
+                className={`tab ${tab === t.id ? 'active' : ''}`}
+                onClick={() => setTab(t.id)}
+              >
+                {t.label}
+              </button>
+            ))}
+          </nav>
 
-      <div className="fade-in" key={tab}>
-        <Active />
-      </div>
+          <div className="fade-in" key={tab}>
+            <Active />
+          </div>
+        </>
+      )}
+
+      <Chatbot />
     </div>
   )
 }

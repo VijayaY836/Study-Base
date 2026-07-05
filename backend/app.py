@@ -21,7 +21,8 @@ from sqlalchemy.orm import sessionmaker, scoped_session
 
 from models import Base, Task, Course, GradeComponent, Resource, Reflection
 from solver import current_standing, solve, target_to_pct, pct_to_scale, generate_schedule
-from services import resource_metadata, analyze_sentiment, fetch_book_meta, fetch_holidays
+from services import (resource_metadata, analyze_sentiment, fetch_book_meta,
+                      fetch_holidays, chat_completion)
 from auth import require_user
 
 # ------------------------------------------------------------------ setup --
@@ -357,6 +358,81 @@ def holidays():
     if key not in _holiday_cache:
         _holiday_cache[key] = fetch_holidays(year, country)
     return jsonify(_holiday_cache[key])
+
+
+# ------------------------------------------------------------------- chat --
+CHAT_SYSTEM = (
+    "You are \"Base\", the friendly study companion built into StudyBase, a "
+    "student productivity app. You can see a snapshot of the student's current "
+    "data below. Use it to be specific and genuinely helpful: motivate them, "
+    "help prioritize what's due, clarify study doubts, and answer questions. "
+    "Be warm and encouraging, and usually concise (2-5 sentences). Reference "
+    "their real tasks, grades, and mood when it's relevant. If they seem "
+    "stressed or low, be kind and supportive — but you are not a therapist, so "
+    "for serious distress gently suggest talking to someone they trust or a "
+    "professional. Never diagnose. Don't invent data you weren't given."
+)
+
+
+def _user_context(user_id):
+    tasks = Session.query(Task).filter_by(user_id=user_id).all()
+    pending = [t for t in tasks if t.status == "pending"]
+    today = date_cls.today().isoformat()
+    overdue = [t for t in pending if t.due_date and t.due_date.isoformat() < today]
+    due_today = [t for t in pending if t.due_date and t.due_date.isoformat() == today]
+
+    lines = [f"Pending tasks: {len(pending)} "
+             f"({len(overdue)} overdue, {len(due_today)} due today). "
+             f"Completed all-time: {len(tasks) - len(pending)}."]
+
+    upcoming = sorted([t for t in pending if t.due_date], key=lambda t: t.due_date)[:6]
+    if upcoming:
+        lines.append("Upcoming deadlines: " + "; ".join(
+            f"{t.title} (due {t.due_date.isoformat()}, {t.priority} priority)"
+            for t in upcoming))
+
+    courses = Session.query(Course).filter_by(user_id=user_id).all()
+    if courses:
+        parts = []
+        for c in courses:
+            standing, _ = current_standing([x.to_dict() for x in c.components])
+            parts.append(f"{c.name}: "
+                         + (f"{standing}%" if standing is not None else "no grades yet")
+                         + f" ({c.scale} scale)")
+        lines.append("Courses — " + " | ".join(parts))
+
+    refl = (Session.query(Reflection).filter_by(user_id=user_id)
+            .order_by(Reflection.date.desc()).limit(7).all())
+    scored = [r for r in refl if r.mood_score is not None]
+    if scored:
+        avg = round(sum(float(r.mood_score) for r in scored) / len(scored), 2)
+        lines.append(f"Recent average mood (-1 low to +1 high): {avg} "
+                     f"over the last {len(scored)} journal entries.")
+
+    return "\n".join(lines)
+
+
+@app.post("/api/chat")
+@require_user
+def chat():
+    b = request.get_json(force=True)
+    msgs = b.get("messages", [])
+    if not msgs:
+        return jsonify({"error": "No message"}), 400
+
+    system = {"role": "system",
+              "content": CHAT_SYSTEM + "\n\nSTUDENT SNAPSHOT:\n" + _user_context(g.user_id)}
+    reply = chat_completion([system] + msgs[-12:])
+
+    if reply is None:
+        return jsonify({
+            "configured": False,
+            "reply": "I'm not fully switched on yet — StudyBase needs an "
+                     "OpenRouter API key set up before I can come online. Once "
+                     "that's added I'll be able to see your tasks, grades, and "
+                     "mood and actually help you out!",
+        })
+    return jsonify({"configured": True, "reply": reply})
 
 
 if __name__ == "__main__":
