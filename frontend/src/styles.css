@@ -1,0 +1,297 @@
+/* ============================================================
+   StudyBase — pastel stationery design system
+   Concept: a student's desk — sticky-note tabs, washi tape,
+   index cards. Light, airy, soft. Syne / DM Sans / DM Mono.
+   ============================================================ */
+
+:root {
+  --paper: #f7f4fc;          /* lavender-tinted white */
+  --card: #ffffff;
+  --ink: #3a3560;            /* deep violet-navy */
+  --ink-soft: #7a76a0;
+  --line: rgba(58, 53, 96, 0.1);
+
+  --peach: #ffdfcc;          /* tasks    */
+  --mint:  #cdeedd;          /* gpa      */
+  --lilac: #e7defb;          /* journal  */
+  --sky:   #d4eaf9;          /* library  */
+  --butter:#fff2c2;          /* schedule */
+
+  --peach-deep: #e88a5d;
+  --mint-deep:  #3f9d6e;
+  --lilac-deep: #8a6fd1;
+  --sky-deep:   #4b93c9;
+  --butter-deep:#c99a2e;
+
+  --coral: #f98d77;          /* primary action */
+  --coral-deep: #e3705a;
+  --danger: #e05c6e;
+
+  --radius: 16px;
+  --shadow: 0 2px 10px rgba(58, 53, 96, 0.06), 0 10px 30px rgba(58, 53, 96, 0.05);
+  --font-display: 'Syne', sans-serif;
+  --font-body: 'DM Sans', sans-serif;
+  --font-mono: 'DM Mono', monospace;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: var(--font-body);
+  background: var(--paper);
+  background-image:
+    radial-gradient(1200px 500px at 85% -10%, rgba(255, 223, 204, 0.35), transparent 60%),
+    radial-gradient(1000px 500px at -10% 20%, rgba(205, 238, 221, 0.3), transparent 55%),
+    radial-gradient(900px 600px at 50% 110%, rgba(212, 234, 249, 0.35), transparent 60%);
+  background-attachment: fixed;
+  color: var(--ink);
+  line-height: 1.55;
+  min-height: 100vh;
+}
+
+::selection { background: var(--lilac); }
+
+.shell { max-width: 1040px; margin: 0 auto; padding: 28px 20px 90px; }
+
+/* ---------------------------------------------------- header + brand ---- */
+.topbar {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 16px; margin-bottom: 26px; flex-wrap: wrap;
+}
+.brand { display: flex; align-items: baseline; gap: 10px; }
+.brand h1 {
+  font-family: var(--font-display); font-weight: 800;
+  font-size: 1.7rem; letter-spacing: -0.02em;
+}
+.brand h1 em { font-style: normal; color: var(--coral-deep); }
+.brand .tagline {
+  font-family: var(--font-mono); font-size: 0.72rem;
+  color: var(--ink-soft); letter-spacing: 0.04em;
+}
+.signout {
+  border: 1px solid var(--line); background: var(--card); color: var(--ink-soft);
+  font-family: var(--font-mono); font-size: 0.72rem; padding: 7px 12px;
+  border-radius: 999px; cursor: pointer;
+}
+.signout:hover { color: var(--ink); border-color: var(--ink-soft); }
+
+/* ------------------------------------------------ sticky-note tab nav ---- */
+.tabs { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 30px; }
+.tab {
+  --tint: var(--lilac); --deep: var(--lilac-deep);
+  font-family: var(--font-display); font-weight: 700; font-size: 0.88rem;
+  color: var(--ink); background: var(--card);
+  border: 1px solid var(--line); border-radius: 12px;
+  padding: 10px 18px; cursor: pointer;
+  transition: transform 0.16s ease, box-shadow 0.16s ease, background 0.16s ease;
+  position: relative;
+}
+.tab:hover { background: color-mix(in srgb, var(--tint) 40%, white); }
+.tab.active {
+  background: var(--tint);
+  transform: rotate(-1.6deg) translateY(-2px);
+  box-shadow: 3px 4px 0 color-mix(in srgb, var(--deep) 35%, transparent);
+  border-color: transparent;
+}
+.tab:focus-visible, button:focus-visible, input:focus-visible,
+select:focus-visible, textarea:focus-visible {
+  outline: 2px solid var(--lilac-deep); outline-offset: 2px;
+}
+.tab[data-c="peach"]  { --tint: var(--peach);  --deep: var(--peach-deep); }
+.tab[data-c="mint"]   { --tint: var(--mint);   --deep: var(--mint-deep); }
+.tab[data-c="lilac"]  { --tint: var(--lilac);  --deep: var(--lilac-deep); }
+.tab[data-c="sky"]    { --tint: var(--sky);    --deep: var(--sky-deep); }
+.tab[data-c="butter"] { --tint: var(--butter); --deep: var(--butter-deep); }
+
+/* ------------------------------------------------------ page header ---- */
+.pagehead { position: relative; margin-bottom: 24px; padding-top: 14px; }
+.pagehead h2 {
+  font-family: var(--font-display); font-weight: 800;
+  font-size: clamp(1.6rem, 3.5vw, 2.2rem); letter-spacing: -0.02em;
+}
+.pagehead p { color: var(--ink-soft); max-width: 56ch; margin-top: 4px; }
+/* washi tape strip */
+.pagehead::before {
+  content: ""; position: absolute; top: 0; left: -8px;
+  width: 96px; height: 22px; transform: rotate(-2.5deg);
+  background: repeating-linear-gradient(
+    115deg, var(--tape, var(--lilac)) 0 10px,
+    color-mix(in srgb, var(--tape, var(--lilac)) 78%, white) 10px 20px);
+  opacity: 0.9; border-radius: 3px;
+}
+
+/* ------------------------------------------------------------- cards ---- */
+.card {
+  background: var(--card); border: 1px solid var(--line);
+  border-radius: var(--radius); box-shadow: var(--shadow);
+  padding: 22px;
+}
+.grid { display: grid; gap: 18px; }
+.grid.two { grid-template-columns: 1fr 1fr; }
+@media (max-width: 800px) { .grid.two { grid-template-columns: 1fr; } }
+
+.card h3 {
+  font-family: var(--font-display); font-weight: 700; font-size: 1.05rem;
+  margin-bottom: 14px;
+}
+
+/* -------------------------------------------------------------- forms ---- */
+label.field { display: block; margin-bottom: 12px; }
+label.field span {
+  display: block; font-family: var(--font-mono); font-size: 0.7rem;
+  letter-spacing: 0.05em; color: var(--ink-soft); margin-bottom: 5px;
+  text-transform: uppercase;
+}
+input, select, textarea {
+  width: 100%; font-family: var(--font-body); font-size: 0.95rem;
+  color: var(--ink); background: #fdfcff;
+  border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px;
+}
+textarea { resize: vertical; min-height: 120px; }
+input::placeholder, textarea::placeholder { color: #b6b3cf; }
+
+.row { display: flex; gap: 10px; flex-wrap: wrap; }
+.row > * { flex: 1; min-width: 120px; }
+
+button.primary {
+  font-family: var(--font-display); font-weight: 700; font-size: 0.92rem;
+  background: var(--coral); color: #fff; border: none; cursor: pointer;
+  border-radius: 12px; padding: 11px 20px;
+  box-shadow: 0 4px 14px rgba(249, 141, 119, 0.4);
+  transition: transform 0.15s ease, background 0.15s ease;
+}
+button.primary:hover { background: var(--coral-deep); transform: translateY(-1px); }
+button.primary:disabled { opacity: 0.55; cursor: default; transform: none; }
+
+button.ghost {
+  font-family: var(--font-mono); font-size: 0.75rem; cursor: pointer;
+  background: transparent; color: var(--ink-soft);
+  border: 1px solid var(--line); border-radius: 999px; padding: 6px 12px;
+}
+button.ghost:hover { color: var(--ink); border-color: var(--ink-soft); }
+button.ghost.danger:hover { color: var(--danger); border-color: var(--danger); }
+
+/* -------------------------------------------------------------- tasks ---- */
+.tasklist { display: flex; flex-direction: column; gap: 10px; }
+.taskitem {
+  display: flex; align-items: center; gap: 14px;
+  background: var(--card); border: 1px solid var(--line);
+  border-radius: 14px; padding: 13px 16px;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.taskitem:hover { transform: translateX(3px); box-shadow: var(--shadow); }
+.taskitem.done { opacity: 0.55; }
+.taskitem.done .t-title { text-decoration: line-through; }
+.t-check {
+  width: 24px; height: 24px; flex: none; border-radius: 8px;
+  border: 2px solid var(--ink-soft); background: transparent; cursor: pointer;
+  display: grid; place-items: center; color: transparent; font-size: 14px;
+  transition: all 0.15s ease;
+}
+.t-check.on { background: var(--mint); border-color: var(--mint-deep); color: var(--mint-deep); }
+.t-main { flex: 1; min-width: 0; }
+.t-title { font-weight: 500; }
+.t-meta { display: flex; gap: 8px; margin-top: 3px; flex-wrap: wrap; }
+.chip {
+  font-family: var(--font-mono); font-size: 0.68rem; letter-spacing: 0.03em;
+  padding: 2px 9px; border-radius: 999px; background: var(--paper);
+  color: var(--ink-soft);
+}
+.chip.high   { background: var(--peach); color: var(--peach-deep); }
+.chip.medium { background: var(--butter); color: var(--butter-deep); }
+.chip.low    { background: var(--sky); color: var(--sky-deep); }
+
+/* ---------------------------------------------------------------- gpa ---- */
+.coursecard { position: relative; overflow: hidden; }
+.coursecard::before {
+  content: ""; position: absolute; top: 0; left: 0; right: 0; height: 6px;
+  background: linear-gradient(90deg, var(--mint), var(--sky));
+}
+.standing {
+  font-family: var(--font-mono); font-size: 2rem; font-weight: 500;
+  color: var(--mint-deep);
+}
+.standing small { font-size: 0.85rem; color: var(--ink-soft); }
+.comp-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+.comp-table th {
+  font-family: var(--font-mono); font-size: 0.68rem; text-transform: uppercase;
+  letter-spacing: 0.06em; color: var(--ink-soft); text-align: left;
+  padding: 6px 8px; border-bottom: 1px solid var(--line);
+}
+.comp-table td { padding: 6px 8px; border-bottom: 1px solid var(--line); }
+.comp-table input { padding: 6px 8px; font-family: var(--font-mono); font-size: 0.85rem; }
+.verdict {
+  margin-top: 14px; padding: 14px 16px; border-radius: 12px;
+  font-weight: 500; background: var(--mint);
+}
+.verdict.bad { background: var(--peach); }
+.verdict .big { font-family: var(--font-mono); font-size: 1.5rem; display: block; }
+
+/* --------------------------------------------------------- reflections ---- */
+.mood-badge { font-family: var(--font-mono); font-size: 0.7rem; padding: 3px 10px;
+  border-radius: 999px; }
+.mood-badge.positive { background: var(--mint); color: var(--mint-deep); }
+.mood-badge.negative { background: var(--peach); color: var(--peach-deep); }
+.mood-badge.neutral  { background: var(--butter); color: var(--butter-deep); }
+.mood-badge.none     { background: var(--paper); color: var(--ink-soft); }
+.entry { border-bottom: 1px dashed var(--line); padding: 12px 0; }
+.entry:last-child { border-bottom: none; }
+.entry .date { font-family: var(--font-mono); font-size: 0.72rem; color: var(--ink-soft); }
+.entry p { margin-top: 4px; white-space: pre-wrap; }
+
+/* ------------------------------------------------------------ library ---- */
+.res-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 16px; }
+.rescard {
+  background: var(--card); border: 1px solid var(--line); border-radius: 14px;
+  overflow: hidden; display: flex; flex-direction: column;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.rescard:hover { transform: translateY(-3px); box-shadow: var(--shadow); }
+.rescard .thumb { width: 100%; aspect-ratio: 16/9; object-fit: cover; background: var(--sky); }
+.rescard .thumb.blank { display: grid; place-items: center; font-size: 1.8rem; }
+.rescard .body { padding: 12px 14px 14px; display: flex; flex-direction: column; gap: 8px; flex: 1; }
+.rescard a { color: var(--ink); text-decoration: none; font-weight: 500; font-size: 0.9rem; line-height: 1.35; }
+.rescard a:hover { color: var(--sky-deep); }
+
+/* ----------------------------------------------------------- schedule ---- */
+.slotrow { display: flex; gap: 10px; align-items: flex-end; margin-bottom: 10px; }
+.plan { display: flex; flex-direction: column; gap: 8px; margin-top: 14px; }
+.planitem {
+  display: flex; gap: 14px; align-items: center;
+  background: var(--butter); border-radius: 12px; padding: 11px 15px;
+}
+.planitem .time { font-family: var(--font-mono); font-size: 0.8rem; color: var(--butter-deep); white-space: nowrap; }
+.warn {
+  background: var(--peach); border-radius: 12px; padding: 12px 15px;
+  margin-top: 12px; font-size: 0.9rem;
+}
+
+/* ---------------------------------------------------------- auth gate ---- */
+.authwrap { min-height: 100vh; display: grid; place-items: center; padding: 20px; }
+.authcard { width: 100%; max-width: 400px; text-align: center; }
+.authcard .logo { font-family: var(--font-display); font-weight: 800; font-size: 2rem; margin-bottom: 4px; }
+.authcard .sub { color: var(--ink-soft); margin-bottom: 22px; font-size: 0.92rem; }
+.authcard form { text-align: left; }
+.switchmode { margin-top: 14px; font-size: 0.85rem; color: var(--ink-soft); }
+.switchmode button { background: none; border: none; color: var(--coral-deep); cursor: pointer; font-weight: 700; }
+
+/* ------------------------------------------------------------- misc ---- */
+.empty {
+  text-align: center; color: var(--ink-soft); padding: 34px 16px;
+  border: 1.5px dashed var(--line); border-radius: var(--radius);
+  font-size: 0.92rem;
+}
+.error-note { color: var(--danger); font-size: 0.85rem; margin-top: 8px; }
+.demo-banner {
+  font-family: var(--font-mono); font-size: 0.72rem; text-align: center;
+  background: var(--butter); color: var(--butter-deep);
+  border-radius: 10px; padding: 8px 12px; margin-bottom: 18px;
+}
+.fade-in { animation: fadeUp 0.35s ease both; }
+@keyframes fadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
