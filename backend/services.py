@@ -113,3 +113,53 @@ def analyze_sentiment(text: str):
         return label, round(signed, 3)
     except Exception:
         return None, None
+
+
+# ---------------------------------------------------------------- books ----
+def fetch_book_meta(query: str):
+    """Look up a book by title or ISBN via Open Library. Returns
+    {title, author, thumbnail, url, year} or None. Never raises."""
+    try:
+        r = requests.get(
+            "https://openlibrary.org/search.json",
+            params={"q": query, "limit": 1,
+                    "fields": "key,title,author_name,cover_i,first_publish_year"},
+            headers={"User-Agent": "StudyBase/1.0 (student project)"},
+            timeout=8,
+        )
+        docs = r.json().get("docs", [])
+        if not docs:
+            return None
+        d = docs[0]
+        cover = (f"https://covers.openlibrary.org/b/id/{d['cover_i']}-M.jpg"
+                 if d.get("cover_i") else None)
+        key = d.get("key", "")
+        url = (f"https://openlibrary.org{key}" if key.startswith("/")
+               else f"https://openlibrary.org/works/{key}")
+        authors = d.get("author_name") or []
+        return {
+            "title": d.get("title"),
+            "author": authors[0] if authors else None,
+            "thumbnail": cover,
+            "url": url,
+            "year": d.get("first_publish_year"),
+        }
+    except Exception:
+        return None
+
+
+# ------------------------------------------------------------- holidays ----
+def fetch_holidays(year, country: str):
+    """Public holidays for a country/year via Nager.Date. Returns a list of
+    {date, name, localName} (possibly empty). Never raises."""
+    try:
+        r = requests.get(
+            f"https://date.nager.at/api/v3/PublicHolidays/{year}/{country}",
+            timeout=8,
+        )
+        if r.status_code != 200:
+            return []
+        return [{"date": h["date"], "name": h.get("name"), "localName": h.get("localName")}
+                for h in r.json()]
+    except Exception:
+        return []

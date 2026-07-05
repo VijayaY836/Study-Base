@@ -4,7 +4,9 @@ import { get, post, del } from '../lib/api'
 export default function Resources() {
   const [resources, setResources] = useState([])
   const [courses, setCourses] = useState([])
+  const [mode, setMode] = useState('link')       // 'link' | 'book'
   const [url, setUrl] = useState('')
+  const [bookQuery, setBookQuery] = useState('')
   const [courseId, setCourseId] = useState('')
   const [tags, setTags] = useState('')
   const [filter, setFilter] = useState('')
@@ -23,13 +25,13 @@ export default function Resources() {
   const add = async (e) => {
     e.preventDefault()
     setBusy(true); setError('')
+    const tagList = tags.split(',').map(t => t.trim()).filter(Boolean)
     try {
-      await post('/api/resources', {
-        url,
-        course_id: courseId || null,
-        tags: tags.split(',').map(t => t.trim()).filter(Boolean),
-      })
-      setUrl(''); setTags('')
+      const payload = mode === 'book'
+        ? { book_query: bookQuery, course_id: courseId || null, tags: tagList }
+        : { url, course_id: courseId || null, tags: tagList }
+      await post('/api/resources', payload)
+      setUrl(''); setBookQuery(''); setTags('')
       await load()
     } catch (err) { setError(err.message) }
     setBusy(false)
@@ -48,13 +50,25 @@ export default function Resources() {
       </div>
 
       <div className="card" style={{ marginBottom: 18 }}>
-        <h3>Save a link</h3>
+        <div className="seg">
+          <button type="button" className={`seg-btn ${mode === 'link' ? 'on' : ''}`}
+            onClick={() => setMode('link')}>🔗 Link</button>
+          <button type="button" className={`seg-btn ${mode === 'book' ? 'on' : ''}`}
+            onClick={() => setMode('book')}>📖 Book</button>
+        </div>
         <form onSubmit={add}>
           <div className="row" style={{ alignItems: 'flex-end' }}>
-            <label className="field" style={{ flex: 2, marginBottom: 0 }}><span>URL</span>
-              <input required value={url} onChange={e => setUrl(e.target.value)}
-                placeholder="https://youtube.com/watch?v=…" />
-            </label>
+            {mode === 'link' ? (
+              <label className="field" style={{ flex: 2, marginBottom: 0 }}><span>URL</span>
+                <input required value={url} onChange={e => setUrl(e.target.value)}
+                  placeholder="https://youtube.com/watch?v=…" />
+              </label>
+            ) : (
+              <label className="field" style={{ flex: 2, marginBottom: 0 }}><span>Book title or ISBN</span>
+                <input required value={bookQuery} onChange={e => setBookQuery(e.target.value)}
+                  placeholder="Introduction to Algorithms  ·  or  9780262033848" />
+              </label>
+            )}
             <label className="field" style={{ marginBottom: 0 }}><span>Course (optional)</span>
               <select value={courseId} onChange={e => setCourseId(e.target.value)}>
                 <option value="">—</option>
@@ -65,9 +79,14 @@ export default function Resources() {
               <input value={tags} onChange={e => setTags(e.target.value)} placeholder="DSA, midterm-prep" />
             </label>
             <button className="primary" disabled={busy} style={{ flex: 'none' }}>
-              {busy ? 'Fetching…' : 'Save'}
+              {busy ? 'Fetching…' : mode === 'book' ? 'Find book' : 'Save'}
             </button>
           </div>
+          {mode === 'book' && (
+            <p style={{ fontSize: '0.78rem', color: 'var(--ink-soft)', marginTop: 8 }}>
+              Pulls the cover, title, and author automatically from Open Library.
+            </p>
+          )}
           {error && <div className="error-note">{error}</div>}
         </form>
       </div>

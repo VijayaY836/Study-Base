@@ -21,7 +21,7 @@ from sqlalchemy.orm import sessionmaker, scoped_session
 
 from models import Base, Task, Course, GradeComponent, Resource, Reflection
 from solver import current_standing, solve, target_to_pct, pct_to_scale, generate_schedule
-from services import resource_metadata, analyze_sentiment
+from services import resource_metadata, analyze_sentiment, fetch_book_meta, fetch_holidays
 from auth import require_user
 
 # ------------------------------------------------------------------ setup --
@@ -226,6 +226,29 @@ def list_resources():
 @require_user
 def create_resource():
     b = request.get_json(force=True)
+
+    # Book flow: look up by title/ISBN via Open Library
+    book_query = (b.get("book_query") or "").strip()
+    if book_query:
+        meta = fetch_book_meta(book_query)
+        if not meta or not meta.get("title"):
+            return jsonify({"error": "Couldn't find that book. Try the full title or an ISBN."}), 404
+        tags = list(b.get("tags", []))
+        if meta.get("author"):
+            tags = [f"by {meta['author']}"] + tags
+        r = Resource(
+            user_id=g.user_id,
+            url=meta.get("url") or "https://openlibrary.org",
+            title=meta["title"],
+            thumbnail=meta.get("thumbnail"),
+            source_type="book",
+            tags=",".join(tags),
+            course_id=b.get("course_id"),
+        )
+        Session.add(r)
+        Session.commit()
+        return jsonify(r.to_dict()), 201
+
     url = (b.get("url") or "").strip()
     if not url.startswith(("http://", "https://")):
         return jsonify({"error": "Enter a full URL (starting with https://)"}), 400
@@ -319,6 +342,21 @@ def schedule():
                      + ", ".join(missing)
         }), 400
     return jsonify(generate_schedule(payload, slots))
+
+
+# --------------------------------------------------------------- holidays --
+_holiday_cache = {}
+
+
+@app.get("/api/holidays")
+@require_user
+def holidays():
+    year = request.args.get("year") or str(date_cls.today().year)
+    country = (request.args.get("country") or "IN").upper()
+    key = f"{year}:{country}"
+    if key not in _holiday_cache:
+        _holiday_cache[key] = fetch_holidays(year, country)
+    return jsonify(_holiday_cache[key])
 
 
 if __name__ == "__main__":

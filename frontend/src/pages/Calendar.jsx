@@ -9,14 +9,31 @@ const RANK = { high: 3, medium: 2, low: 1 }
 const pad = (n) => String(n).padStart(2, '0')
 const iso = (d) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
 
+const COUNTRIES = [
+  ['IN', '🇮🇳 India'], ['US', '🇺🇸 USA'], ['GB', '🇬🇧 UK'], ['CA', '🇨🇦 Canada'],
+  ['AU', '🇦🇺 Australia'], ['DE', '🇩🇪 Germany'], ['FR', '🇫🇷 France'],
+  ['SG', '🇸🇬 Singapore'], ['AE', '🇦🇪 UAE'], ['JP', '🇯🇵 Japan'],
+]
+
 export default function Calendar() {
   const [tasks, setTasks] = useState([])
   const [cursor, setCursor] = useState(() => { const d = new Date(); return new Date(d.getFullYear(), d.getMonth(), 1) })
   const [selected, setSelected] = useState(iso(new Date()))
+  const [country, setCountry] = useState(() => localStorage.getItem('sb_country') || 'IN')
+  const [holidays, setHolidays] = useState({})   // { 'YYYY-MM-DD': name }
   const [error, setError] = useState('')
 
   const load = () => get('/api/tasks?status=pending').then(setTasks).catch(e => setError(e.message))
   useEffect(() => { load() }, [])
+
+  // fetch holidays whenever the displayed year or country changes
+  const year = cursor.getFullYear()
+  useEffect(() => {
+    localStorage.setItem('sb_country', country)
+    get(`/api/holidays?year=${year}&country=${country}`)
+      .then(list => setHolidays(Object.fromEntries(list.map(h => [h.date, h.name || h.localName]))))
+      .catch(() => setHolidays({}))
+  }, [year, country])
 
   const todayIso = iso(new Date())
 
@@ -96,6 +113,10 @@ export default function Calendar() {
               {MONTHS[cursor.getMonth()]} <span>{cursor.getFullYear()}</span>
             </div>
             <div className="cal-nav">
+              <select className="cal-country" value={country} onChange={e => setCountry(e.target.value)}
+                aria-label="Country for holidays">
+                {COUNTRIES.map(([code, label]) => <option key={code} value={code}>{label}</option>)}
+              </select>
               <button className="ghost" onClick={goToday}>today</button>
               <button className="cal-arrow" onClick={() => stepMonth(-1)} aria-label="Previous month">‹</button>
               <button className="cal-arrow" onClick={() => stepMonth(1)} aria-label="Next month">›</button>
@@ -112,6 +133,7 @@ export default function Calendar() {
               const top = items.reduce((m, t) => Math.max(m, RANK[t.priority] || 0), 0)
               const tint = top === 3 ? 'high' : top === 2 ? 'medium' : top === 1 ? 'low' : ''
               const overdue = items.length > 0 && key < todayIso
+              const holiday = holidays[key]
               return (
                 <button
                   key={key}
@@ -120,12 +142,17 @@ export default function Calendar() {
                     inMonth ? '' : 'other-month',
                     tint ? `t-${tint}` : '',
                     overdue ? 'overdue' : '',
+                    holiday ? 'holiday' : '',
                     key === todayIso ? 'today' : '',
                     key === selected ? 'selected' : '',
                   ].join(' ')}
                   onClick={() => setSelected(key)}
+                  title={holiday || undefined}
                 >
-                  <span className="cal-num">{date.getDate()}</span>
+                  <span className="cal-topline">
+                    <span className="cal-num">{date.getDate()}</span>
+                    {holiday && <span className="cal-holiday" aria-label={holiday}>★</span>}
+                  </span>
                   {items.length > 0 && (
                     <span className="cal-dots">
                       {items.slice(0, 3).map((t, i) =>
@@ -154,6 +181,10 @@ export default function Calendar() {
             {selDate.toLocaleDateString(undefined, { month: 'long', day: 'numeric' })}
             {selected === todayIso && ' · today'}
           </div>
+
+          {holidays[selected] && (
+            <div className="holiday-banner">★ {holidays[selected]}</div>
+          )}
 
           {selectedTasks.length === 0 ? (
             <div className="empty" style={{ padding: 24 }}>Nothing due this day. Breathe.</div>
