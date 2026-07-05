@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react'
 import { supabase, demoMode } from './lib/supabase'
+import Dashboard from './pages/Dashboard'
+import Calendar from './pages/Calendar'
 import Tasks from './pages/Tasks'
 import Gpa from './pages/Gpa'
 import Reflections from './pages/Reflections'
@@ -7,6 +9,8 @@ import Resources from './pages/Resources'
 import Schedule from './pages/Schedule'
 
 const TABS = [
+  { id: 'dashboard', label: 'Dashboard', color: 'mint', el: Dashboard },
+  { id: 'calendar', label: 'Calendar', color: 'peach', el: Calendar },
   { id: 'tasks', label: 'Tasks', color: 'peach', el: Tasks },
   { id: 'gpa', label: 'GPA', color: 'mint', el: Gpa },
   { id: 'journal', label: 'Journal', color: 'lilac', el: Reflections },
@@ -67,7 +71,7 @@ function AuthGate({ onDone }) {
 }
 
 export default function App() {
-  const [tab, setTab] = useState('tasks')
+  const [tab, setTab] = useState('dashboard')
   const [session, setSession] = useState(null)
   const [ready, setReady] = useState(demoMode)
 
