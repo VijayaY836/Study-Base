@@ -6,6 +6,10 @@ StudyBase is a full-stack productivity web app for students that brings tasks, g
 
 🔗 **Live demo:** https://study-base-nine.vercel.app
 
+> **👩‍⚖️ Reviewing this? Two ways in:**
+> **(1)** Create your own account (email/password or one-tap Google), **or**
+> **(2)** click **"✨ Explore the sample account"** right on the login page — no signup — to jump straight into a fully-loaded, fully-interactive StudyBase pre-filled with courses, grades, tasks, a semester of journal entries, and saved resources.
+
 ---
 
 ## Table of Contents
@@ -42,14 +46,14 @@ Everything is single-user-per-account and fully private (row-level security in P
 
 ## Feature highlights
 
+### 📊 Dashboard
+The landing screen — a real at-a-glance overview: KPI cards (overall standing, pending, due this week, journal streak, recent mood), plus the mood-over-time chart, standing-by-course bars, a priority donut, weekly completion momentum, and your next deadlines.
+
 ### 📋 Tasks
 Create, edit, complete, and delete tasks with priority, due date, and an estimated duration. Completed tasks cross out and collapse. The duration feeds the planner.
 
 ### 🗓️ Calendar
 A month view where **every day is tinted by its most urgent pending task** (high / medium / low), overdue days get a red edge, and today is highlighted. Tap a day to see and complete its tasks. **Public holidays** for your country are overlaid automatically, with a country selector.
-
-### 📊 Dashboard
-The landing screen — a real at-a-glance overview: KPI cards (overall standing, pending, due this week, journal streak, recent mood), plus the mood-over-time chart, standing-by-course bars, a priority donut, weekly completion momentum, and your next deadlines.
 
 ### 🎓 GPA Calculator
 The differentiator. Each course has a fully editable grade breakdown (Assignments / Midterm / Final / Attendance by default) across multiple scales (4.0, 5.0, 10.0, or percentage). Two modes:
@@ -68,11 +72,26 @@ Tell it your free time slots for the day and it greedily schedules your tasks by
 ### 🤖 AI study companion ("Base")
 A floating chat assistant that can **see a snapshot of your real data** — tasks, grades, mood — and use it to motivate you, help you prioritize, and clarify study doubts. Supportive by design (never clinical), and fail-soft so it never breaks the app.
 
-### 👤 Accounts
-Email/password **and** Google sign-in via Supabase Auth. A **My Account** page shows your profile and a snapshot of everything you've tracked.
+### 👤 Accounts & sample mode
+Email/password **and** Google sign-in via Supabase Auth. A **My Account** page shows your profile and a snapshot of everything you've tracked. And a one-click **sample account** lets anyone explore a fully-populated, fully-interactive StudyBase with no signup — ideal for demos and reviewers (see [below](#sample-account)).
 
 ### 🎨 Craft
 A cohesive pastel "stationery" design system — sticky-note tabs, washi-tape headers, dotted-notebook texture — with a gentle animated background (drifting gradient blobs + floating doodles), all dependency-free and motion-reduced-friendly.
+
+---
+
+<a name="sample-account"></a>
+## 🎬 Sample account (instant demo)
+
+Clicking **"Explore the sample account"** on the login page enters an **isolated, in-memory demo** — not a shared login. It's seeded with a realistic semester (4 courses across different grading scales, ~15 tasks, ~14 journal entries forming a mood curve, and a mix of video/article/book resources), and every page works for real: you can add tasks, complete them, run the GPA solver, generate a schedule, and chat with Base.
+
+Why in-memory instead of a shared account:
+
+- **Always pristine** — every visitor gets the same perfect starting state; nobody can corrupt it for the next person.
+- **Instant** — loads immediately even if the (free-tier) backend is asleep, so a demo never stalls on a cold start.
+- **Zero key dependencies** — works whether or not the AI/auth services are configured.
+
+Under the hood it's an in-memory mirror of the real REST API (`frontend/src/lib/sample.js`), including JS ports of the GPA solver and greedy scheduler, so the entire app runs unchanged against sample data.
 
 ---
 
@@ -121,7 +140,7 @@ All keyless or free-tier, integrated **server-side** and **fail-soft** (a missin
 ```
 Browser (React on Vercel)
    │  supabase-js  →  Supabase Auth  (email + Google OAuth)
-   │  fetch /api/* (Bearer token)
+   │  fetch /api/* (Bearer token)   ── or ──  in-memory sample API (demo mode)
    ▼
 Flask API (Render)
    │  verifies Supabase JWT (ES256 via JWKS, HS256 fallback)
@@ -155,11 +174,14 @@ studybase/
 │   └── .python-version     pins Python 3.12 for deployment
 └── frontend/
     ├── src/
-    │   ├── App.jsx         Auth gate, tab shell, account view
+    │   ├── App.jsx         Auth gate, sample mode, tab shell, account view
     │   ├── Background.jsx  Animated ambient background
     │   ├── main.jsx
     │   ├── styles.css      Pastel design system
-    │   ├── lib/            Supabase client + API fetch wrapper
+    │   ├── lib/
+    │   │   ├── supabase.js Supabase client
+    │   │   ├── api.js      API fetch wrapper (routes to sample mock in demo mode)
+    │   │   └── sample.js   In-memory sample account (seed data + mock API)
     │   └── pages/          Dashboard, Calendar, Tasks, Gpa, Reflections,
     │                       Resources, Schedule, Account, Chatbot
     ├── index.html
@@ -172,7 +194,7 @@ studybase/
 
 ### Demo mode (zero keys)
 
-The app runs with **no configuration** at all: it falls back to SQLite, skips login, and gracefully disables the AI/metadata features. Great for a first run.
+The app runs with **no configuration** at all: it falls back to SQLite, skips login, and gracefully disables the AI/metadata features. Great for a first run. (You can also click **"Explore the sample account"** any time to browse a fully-populated, isolated demo.)
 
 ```bash
 # Terminal 1 — backend
@@ -186,7 +208,7 @@ npm install
 npm run dev                        # http://localhost:5173
 ```
 
-Open http://localhost:5173 — you'll see a "demo mode" banner.
+Open http://localhost:5173.
 
 ### Full mode (with auth, DB, and AI)
 
@@ -237,7 +259,7 @@ Open http://localhost:5173 — you'll see a "demo mode" banner.
 2. Deploy the frontend on Vercel with `VITE_API_URL` = the Render URL.
 3. Set `FRONTEND_ORIGIN` on Render to your exact Vercel URL (closes the CORS loop).
 
-> Render's free tier sleeps after ~15 min idle. Warm the site a couple of minutes before a demo so the first load isn't a cold start.
+> Render's free tier sleeps after ~15 min idle. Warm the site a couple of minutes before a demo — or just use the **sample account**, which needs no backend and loads instantly.
 
 ---
 
@@ -247,6 +269,7 @@ Open http://localhost:5173 — you'll see a "demo mode" banner.
 - After sign-in the frontend holds a Supabase access token (ES256-signed on newer projects) and sends it as a Bearer token.
 - The Flask backend verifies that token against Supabase's public keys (JWKS), with an HS256 fallback for older projects — so **it works regardless of how the user signed in**, and the same account links across email and Google.
 - All tables carry a `user_id` and are protected by row-level security.
+- A **sample account** path bypasses auth entirely for a read/write in-memory demo — no credentials, no persistence.
 
 ---
 

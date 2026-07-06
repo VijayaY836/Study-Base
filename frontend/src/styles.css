@@ -620,3 +620,22 @@ body {
 @media (max-width: 520px) {
   .chat-panel { right: 8px; left: 8px; width: auto; }
 }
+
+/* ============================================================
+   v8 — sample account button + banner
+   ============================================================ */
+.sample-btn {
+  width: 100%; margin-top: 18px; cursor: pointer;
+  font-family: var(--font-display); font-weight: 700; font-size: 0.9rem;
+  color: var(--lilac-deep); background: var(--lilac);
+  border: none; border-radius: 12px; padding: 12px 20px;
+  transition: transform 0.15s ease, background 0.15s ease;
+}
+.sample-btn:hover { transform: translateY(-1px); background: color-mix(in srgb, var(--lilac) 70%, var(--lilac-deep) 18%); }
+.sample-hint {
+  text-align: center; font-family: var(--font-mono); font-size: 0.68rem;
+  color: var(--ink-soft); margin-top: 8px;
+}
+.sample-banner {
+  background: var(--lilac); color: var(--lilac-deep);
+}

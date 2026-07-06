@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { supabase, demoMode } from '../lib/supabase'
+import { sampleActive, sampleProfile } from '../lib/sample'
 import { get } from '../lib/api'
 
 const pad = (n) => String(n).padStart(2, '0')
@@ -12,7 +13,9 @@ export default function Account({ onBack }) {
   const [reflections, setReflections] = useState([])
 
   useEffect(() => {
-    if (demoMode) {
+    if (sampleActive()) {
+      setProfile(sampleProfile)
+    } else if (demoMode) {
       setProfile({ name: 'Demo Student', email: 'demo@studybase.app', created: null, avatar: null })
     } else {
       supabase.auth.getUser().then(({ data }) => {
@@ -76,7 +79,7 @@ export default function Account({ onBack }) {
           <div className="acct-email">{profile?.email || ''}</div>
           {memberSince && <div className="acct-since">Member since {memberSince}</div>}
         </div>
-        {!demoMode && (
+        {!demoMode && !sampleActive() && (
           <button className="signout" onClick={() => supabase.auth.signOut()}>sign out</button>
         )}
       </div>

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { supabase, demoMode } from './lib/supabase'
+import { enterSample, exitSample, sampleActive } from './lib/sample'
 import Dashboard from './pages/Dashboard'
 import Calendar from './pages/Calendar'
 import Account from './pages/Account'
@@ -20,7 +21,7 @@ const TABS = [
   { id: 'schedule', label: 'Planner', color: 'butter', el: Schedule },
 ]
 
-function AuthGate({ onDone }) {
+function AuthGate({ onDone, onSample }) {
   const [mode, setMode] = useState('signin')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -90,6 +91,11 @@ function AuthGate({ onDone }) {
             {mode === 'signin' ? 'Create account' : 'Sign in'}
           </button>
         </div>
+
+        <button type="button" className="sample-btn" onClick={onSample}>
+          ✨ Explore the sample account
+        </button>
+        <div className="sample-hint">No signup — jump into a fully-loaded demo</div>
       </div>
     </div>
   )
@@ -100,6 +106,7 @@ export default function App() {
   const [showAccount, setShowAccount] = useState(false)
   const [session, setSession] = useState(null)
   const [ready, setReady] = useState(demoMode)
+  const [sample, setSample] = useState(false)
 
   useEffect(() => {
     if (demoMode) return
@@ -110,8 +117,11 @@ export default function App() {
     return () => sub.subscription.unsubscribe()
   }, [])
 
+  const startSample = () => { enterSample(); setTab('dashboard'); setShowAccount(false); setSample(true) }
+  const stopSample = () => { exitSample(); setSample(false) }
+
   if (!ready) return null
-  if (!demoMode && !session) return <AuthGate onDone={() => {}} />
+  if (!demoMode && !session && !sample) return <AuthGate onDone={() => {}} onSample={startSample} />
 
   const Active = TABS.find(t => t.id === tab).el
 
@@ -124,7 +134,10 @@ export default function App() {
         </div>
         <div className="topbar-actions">
           <button className="signout" onClick={() => setShowAccount(true)}>my account</button>
-          {!demoMode && (
+          {sample && (
+            <button className="signout" onClick={stopSample}>exit sample</button>
+          )}
+          {!demoMode && !sample && (
             <button className="signout" onClick={() => supabase.auth.signOut()}>
               sign out
             </button>
@@ -132,7 +145,14 @@ export default function App() {
         </div>
       </div>
 
-      {demoMode && (
+      {sample && (
+        <div className="demo-banner sample-banner">
+          ✨ You're exploring a sample account — feel free to click around and edit;
+          nothing is saved, and it resets when you exit.
+        </div>
+      )}
+
+      {demoMode && !sample && (
         <div className="demo-banner">
           demo mode — no login configured yet, data is shared locally
         </div>

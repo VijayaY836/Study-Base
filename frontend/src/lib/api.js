@@ -1,4 +1,5 @@
 import { supabase } from './supabase'
+import { sampleActive, sampleApi } from './sample'
 
 const BASE = import.meta.env.VITE_API_URL || ''  // '' = vite dev proxy
 
@@ -10,6 +11,9 @@ async function authHeader() {
 }
 
 export async function api(path, options = {}) {
+  // Sample-account mode: serve everything from the in-memory dataset.
+  if (sampleActive()) return sampleApi(path, options)
+
   const headers = {
     'Content-Type': 'application/json',
     ...(await authHeader()),
