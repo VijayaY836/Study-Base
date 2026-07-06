@@ -188,6 +188,32 @@ const CHAT_REPLIES = [
 ]
 let chatIdx = 0
 
+// Build a compact snapshot of the sample student's data for the AI.
+function sampleContext() {
+  const s = store, today = dayOffset(0)
+  const pending = s.tasks.filter(t => t.status === 'pending')
+  const overdue = pending.filter(t => t.due_date && t.due_date < today)
+  const dueToday = pending.filter(t => t.due_date === today)
+  const lines = [`Student: Alex Rivera. Pending tasks: ${pending.length} `
+    + `(${overdue.length} overdue, ${dueToday.length} due today). `
+    + `Completed all-time: ${s.tasks.length - pending.length}.`]
+  const upcoming = pending.filter(t => t.due_date)
+    .sort((a, b) => a.due_date.localeCompare(b.due_date)).slice(0, 6)
+  if (upcoming.length) lines.push('Upcoming: ' + upcoming
+    .map(t => `${t.title} (due ${t.due_date}, ${t.priority})`).join('; '))
+  const cparts = s.courses.map(c => {
+    const [st] = currentStanding(c.components)
+    return `${c.name}: ${st != null ? st + '%' : 'no grades yet'} (${c.scale})`
+  })
+  if (cparts.length) lines.push('Courses — ' + cparts.join(' | '))
+  const scored = s.reflections.filter(r => r.mood_score != null)
+  if (scored.length) {
+    const avg = round(scored.reduce((a, r) => a + r.mood_score, 0) / scored.length, 2)
+    lines.push(`Recent average mood (-1 low to +1 high): ${avg}.`)
+  }
+  return lines.join('\n')
+}
+
 // The public entry point used by lib/api.js when sample mode is on.
 export async function sampleApi(path, options = {}) {
   await new Promise(r => setTimeout(r, 180)) // tiny delay so it feels real
@@ -318,8 +344,23 @@ export async function sampleApi(path, options = {}) {
     ]
   }
 
-  // ----- chat -----
+  // ----- chat: try the live AI (guest endpoint) first, fall back to canned -----
   if (parts[1] === 'chat' && method === 'POST') {
+    try {
+      const ctrl = new AbortController()
+      const timer = setTimeout(() => ctrl.abort(), 22000)
+      const base = import.meta.env.VITE_API_URL || ''
+      const res = await fetch(`${base}/api/chat/guest`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ messages: body.messages || [], context: sampleContext() }),
+        signal: ctrl.signal,
+      })
+      clearTimeout(timer)
+      if (res.ok) {
+        const data = await res.json()
+        if (data && data.reply) return { configured: true, reply: data.reply }
+      }
+    } catch { /* backend unreachable — use a canned reply */ }
     const reply = CHAT_REPLIES[chatIdx % CHAT_REPLIES.length]; chatIdx++
     return { configured: true, reply }
   }

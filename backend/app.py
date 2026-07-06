@@ -435,5 +435,21 @@ def chat():
     return jsonify({"configured": True, "reply": reply})
 
 
+@app.post("/api/chat/guest")
+def chat_guest():
+    """Unauthenticated chat for the demo/sample account. The student snapshot is
+    supplied by the client (the in-memory sample data) instead of the DB, so the
+    demo companion can answer real questions and still 'see' the sample data."""
+    b = request.get_json(force=True)
+    msgs = b.get("messages", [])[-12:]
+    if not msgs:
+        return jsonify({"error": "No message"}), 400
+    context = (b.get("context") or "")[:2000]
+    system = {"role": "system",
+              "content": CHAT_SYSTEM + "\n\nSTUDENT SNAPSHOT (demo account):\n" + context}
+    reply = chat_completion([system] + msgs)
+    return jsonify({"configured": reply is not None, "reply": reply})
+
+
 if __name__ == "__main__":
     app.run(debug=True, port=5000)
