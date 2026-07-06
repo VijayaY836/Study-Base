@@ -674,3 +674,44 @@ body {
   .focus-row { grid-template-columns: 110px 1fr 40px; gap: 8px; }
   .focus-name { font-size: 0.82rem; }
 }
+
+/* ============================================================
+   v10 — Focus Advisor tab (charts + what-if)
+   ============================================================ */
+.focus-subnote { font-size: 0.82rem; color: var(--ink-soft); line-height: 1.5; margin-bottom: 12px; }
+.focus-legend, .whatif-marks { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 10px;
+  font-family: var(--font-mono); font-size: 0.72rem; color: var(--ink-soft); }
+.focus-legend span { display: inline-flex; align-items: center; gap: 6px; }
+.focus-legend .sw { width: 12px; height: 12px; border-radius: 4px; display: inline-block; }
+
+/* what-if slider */
+.whatif { display: flex; align-items: center; gap: 20px; flex-wrap: wrap; margin: 6px 0 4px; }
+.whatif-slider {
+  flex: 1; min-width: 200px; -webkit-appearance: none; appearance: none; height: 10px;
+  border-radius: 999px; background: linear-gradient(90deg, var(--peach), var(--coral));
+  outline: none; cursor: pointer;
+}
+.whatif-slider::-webkit-slider-thumb {
+  -webkit-appearance: none; appearance: none; width: 26px; height: 26px; border-radius: 50%;
+  background: #fff; border: 3px solid var(--coral); cursor: pointer;
+  box-shadow: 0 2px 8px rgba(249,141,119,0.5);
+}
+.whatif-slider::-moz-range-thumb {
+  width: 26px; height: 26px; border-radius: 50%; background: #fff; border: 3px solid var(--coral);
+  cursor: pointer; box-shadow: 0 2px 8px rgba(249,141,119,0.5);
+}
+.whatif-readout { display: flex; align-items: center; gap: 14px; }
+.whatif-score {
+  font-family: var(--font-mono); font-size: 1.5rem; font-weight: 500; color: var(--coral-deep);
+  background: var(--peach); border-radius: 12px; padding: 6px 14px; min-width: 74px; text-align: center;
+}
+.whatif-arrow { color: var(--ink-soft); font-size: 1.2rem; }
+.whatif-proj { display: flex; flex-direction: column; }
+.whatif-num { font-family: var(--font-mono); font-size: 1.7rem; font-weight: 500; color: var(--mint-deep); line-height: 1; }
+.whatif-cap { font-family: var(--font-mono); font-size: 0.66rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--ink-soft); }
+.whatif-mark {
+  font-family: var(--font-mono); font-size: 0.75rem; cursor: pointer;
+  background: var(--paper); border: 1px solid var(--line); color: var(--ink-soft);
+  border-radius: 8px; padding: 4px 12px;
+}
+.whatif-mark.on { background: var(--coral); color: #fff; border-color: transparent; }

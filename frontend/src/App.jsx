@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { supabase, demoMode } from './lib/supabase'
 import { enterSample, exitSample, sampleActive } from './lib/sample'
 import Dashboard from './pages/Dashboard'
+import Focus from './pages/Focus'
 import Calendar from './pages/Calendar'
 import Account from './pages/Account'
 import Chatbot from './pages/Chatbot'
@@ -13,6 +14,7 @@ import Schedule from './pages/Schedule'
 
 const TABS = [
   { id: 'dashboard', label: 'Dashboard', color: 'mint', el: Dashboard },
+  { id: 'focus', label: 'Focus', color: 'peach', el: Focus },
   { id: 'calendar', label: 'Calendar', color: 'peach', el: Calendar },
   { id: 'tasks', label: 'Tasks', color: 'peach', el: Tasks },
   { id: 'gpa', label: 'GPA', color: 'mint', el: Gpa },

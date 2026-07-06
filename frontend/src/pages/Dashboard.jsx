@@ -4,7 +4,6 @@ import {
   XAxis, YAxis, Tooltip, ResponsiveContainer, ReferenceLine, CartesianGrid,
 } from 'recharts'
 import { get } from '../lib/api'
-import FocusAdvisor from './FocusAdvisor'
 
 const pad = (n) => String(n).padStart(2, '0')
 const iso = (d) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
@@ -116,11 +115,6 @@ export default function Dashboard() {
           sub={m.streak ? 'keep it going' : 'write today'} />
         <Kpi tint="var(--sky)" value={moodFace(m.avgMood)} label="recent mood"
           sub={m.avgMood == null ? 'no entries yet' : `${m.avgMood > 0 ? '+' : ''}${m.avgMood.toFixed(2)} avg`} />
-      </div>
-
-      {/* Focus Advisor — cross-course study prioritization */}
-      <div style={{ marginTop: 18 }}>
-        <FocusAdvisor courses={courses} mood={m.avgMood} />
       </div>
 
       {/* headline data-viz: mood over time */}

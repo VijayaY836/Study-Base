@@ -12,6 +12,27 @@ StudyBase is a full-stack productivity web app for students that brings tasks, g
 
 ---
 
+## 📸 Screenshots
+
+<!--
+  Drop your images in a /docs folder at the repo root, then the paths below will render.
+  Recommended shots: the dashboard (with Focus Advisor), the calendar, the GPA what-if
+  chart, and the AI companion. Delete any rows you don't use.
+-->
+
+|  |  |
+|---|---|
+| ![Dashboard](docs/dashboard.png) | ![Focus Advisor](docs/focus-advisor.png) |
+| **Dashboard** — semester at a glance | **Focus Advisor** — what to study next |
+| ![Calendar](docs/calendar.png) | ![GPA what-if](docs/gpa.png) |
+| **Calendar** — color-coded by urgency + holidays | **GPA solver** — what you need on the final |
+| ![Journal](docs/journal.png) | ![AI companion](docs/chatbot.png) |
+| **Journal** — daily reflection + mood chart | **Base** — your data-aware AI companion |
+
+> _Screenshots live in `docs/`. To add one: save the PNG (e.g. `docs/dashboard.png`) and it renders here automatically._
+
+---
+
 ## Table of Contents
 
 - [What it is](#what-it-is)
@@ -49,8 +70,11 @@ Everything is single-user-per-account and fully private (row-level security in P
 ### 📊 Dashboard
 The landing screen — a real at-a-glance overview: KPI cards (overall standing, pending, due this week, journal streak, recent mood), plus the mood-over-time chart, standing-by-course bars, a priority donut, weekly completion momentum, and your next deadlines.
 
-### 🎯 Focus Advisor (decision-support)
-The smartest thing StudyBase does: it answers *"what should I study next?"* Rather than just showing grades, it looks across **all** your courses and ranks them by how many points your **overall credit-weighted GPA** could still gain — blending how much is still ungraded, how you're currently doing, and each course's credit weight. So it recommends the course where your next study hour actually pays off most (often a weaker course with a big exam left, not the one with the most ungraded work). It even softens its nudge if your recent mood has been low. Pure, deterministic math — no black box.
+### 🎯 Focus Advisor (its own tab — decision-support)
+The smartest thing StudyBase does, now with a dedicated tab: it answers *"what should I study next?"* Rather than just showing grades, it looks across **all** your courses and ranks them by how many points your **overall credit-weighted GPA** could still gain — blending how much is still ungraded, how you're currently doing, and each course's credit weight. So it recommends the course where your next study hour actually pays off most (often a weaker course with a big exam left, not the one with the most ungraded work). The tab goes deeper with:
+- a **floor → ceiling range chart** showing each course's guaranteed minimum vs. best-case maximum,
+- an **effort-vs-payoff bubble chart** (work remaining × GPA payoff × credits), and
+- an **interactive what-if slider** that projects your overall standing live as you imagine scoring higher or lower on everything that's left.
 
 ### 📋 Tasks
 Create, edit, complete, and delete tasks with priority, due date, and an estimated duration. Completed tasks cross out and collapse. The duration feeds the planner.
@@ -109,6 +133,9 @@ Built with **Recharts**:
 | Standing by course | Dashboard | Every course normalized to % for fair comparison (bar) |
 | Pending by priority | Dashboard | High / medium / low split (donut) |
 | Weekly momentum | Dashboard | Tasks completed per day, last 7 days (bar) |
+| Grade floor → ceiling | Focus Advisor | Guaranteed minimum vs. best-case per course (stacked bar) |
+| Effort vs. payoff | Focus Advisor | Work remaining × GPA payoff × credits (bubble scatter) |
+| What-if projection | Focus Advisor | Live overall-standing projection driven by a slider |
 
 ---
 
@@ -185,7 +212,7 @@ studybase/
     │   │   ├── supabase.js Supabase client
     │   │   ├── api.js      API fetch wrapper (routes to sample mock in demo mode)
     │   │   └── sample.js   In-memory sample account (seed data + mock API)
-    │   └── pages/          Dashboard, FocusAdvisor, Calendar, Tasks, Gpa,
+    │   └── pages/          Dashboard, Focus (Advisor), Calendar, Tasks, Gpa,
     │                       Reflections, Resources, Schedule, Account, Chatbot
     ├── index.html
     └── package.json
