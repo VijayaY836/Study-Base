@@ -38,7 +38,7 @@ It was built to satisfy three goals at once:
 
 - **Free public APIs** — real third-party integrations, no paid tiers.
 - **Data visualization** — charts that turn raw data into insight (mood over time, grade what-ifs, momentum).
-- **A constraint-solving "AI-ish" feature** — a GPA reverse-solver that tells you exactly what you need on the final.
+- **Constraint-solving, decision-support features** — a GPA reverse-solver that tells you exactly what you need on the final, and a Focus Advisor that tells you which course to study next for the biggest GPA payoff.
 
 Everything is single-user-per-account and fully private (row-level security in Postgres).
 
@@ -48,6 +48,9 @@ Everything is single-user-per-account and fully private (row-level security in P
 
 ### 📊 Dashboard
 The landing screen — a real at-a-glance overview: KPI cards (overall standing, pending, due this week, journal streak, recent mood), plus the mood-over-time chart, standing-by-course bars, a priority donut, weekly completion momentum, and your next deadlines.
+
+### 🎯 Focus Advisor (decision-support)
+The smartest thing StudyBase does: it answers *"what should I study next?"* Rather than just showing grades, it looks across **all** your courses and ranks them by how many points your **overall credit-weighted GPA** could still gain — blending how much is still ungraded, how you're currently doing, and each course's credit weight. So it recommends the course where your next study hour actually pays off most (often a weaker course with a big exam left, not the one with the most ungraded work). It even softens its nudge if your recent mood has been low. Pure, deterministic math — no black box.
 
 ### 📋 Tasks
 Create, edit, complete, and delete tasks with priority, due date, and an estimated duration. Completed tasks cross out and collapse. The duration feeds the planner.
@@ -182,8 +185,8 @@ studybase/
     │   │   ├── supabase.js Supabase client
     │   │   ├── api.js      API fetch wrapper (routes to sample mock in demo mode)
     │   │   └── sample.js   In-memory sample account (seed data + mock API)
-    │   └── pages/          Dashboard, Calendar, Tasks, Gpa, Reflections,
-    │                       Resources, Schedule, Account, Chatbot
+    │   └── pages/          Dashboard, FocusAdvisor, Calendar, Tasks, Gpa,
+    │                       Reflections, Resources, Schedule, Account, Chatbot
     ├── index.html
     └── package.json
 ```
